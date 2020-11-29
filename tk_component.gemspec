@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["jes@josepegea.com"]
 
   spec.summary       = %q{Use TK from Ruby in a component oriented fashion }
-  spec.description   = %q{TkComponent  allows you to create desktop UIs using a component structure taking advantadge of TK, the UI toolkit created for TCL and used by Python in TkInter }
+  spec.description   = %q{TkComponent allows you to create desktop UIs using a component structure taking advantadge of TK, the UI toolkit created for TCL and used by Python in TkInter }
   spec.homepage      = "https://github.com/josepegea/tk_component"
   spec.license       = "MIT"
 
@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 
     spec.metadata["homepage_uri"] = spec.homepage
     spec.metadata["source_code_uri"] = "https://github.com/josepegea/tk_component"
-    spec.metadata["changelog_uri"] = "https://github.com/josepegea/tk_component"
+    spec.metadata["changelog_uri"] = "https://github.com/josepegea/tk_component/releases"
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."
