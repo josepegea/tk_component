@@ -138,6 +138,16 @@ module TkComponent
         native_item.replace('1.0', 'end', text)
       end
 
+      def selected_text
+        ranges = native_item.tag_ranges('sel')
+        return nil if ranges.empty?
+        native_item.get(ranges.first.first, ranges.first.last)
+      end
+
+      def append_text(text)
+        native_item.insert('end', text)
+      end
+
       def set_event_handler(event_handler)
         case event_handler.name
         when :change
@@ -159,9 +169,41 @@ module TkComponent
       end
     end
 
+    class TkTree < TkItem
+      @column_defs = []
+
+      def apply_options(options)
+        super
+        return unless @column_defs.any?
+        cols = @column_defs.map { |c| c[:key] }
+        native_item.columns(cols.join(' '))
+        @column_defs.each do |cd|
+          column_conf = cd.slice(:width, :anchor)
+          native_item.column_configure(cd['key'], column_conf) unless column_conf.empty?
+          heading_conf = cd.slice(:text)
+          native_item.heading_configure(cd['key'], heading_conf) unless heading_conf.empty?
+        end
+      end
+
+      def apply_option(option, v)
+        super unless option.to_sym == :column_defs
+        @column_defs = v
+      end
+    end
+
+    class TkTreeNode < TkItem
+      def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
+        parent_node = options.delete(:parent) || ''
+        parent_native_item = (parent_node == '' ? '' : parent_node.native_item)
+        at = options.delete(:at)
+        @native_item = parent_item.native_item.insert(parent_native_item, at, options)
+        set_event_handlers(event_handlers)
+      end
+    end
+
     class TkWindow < TkItem
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
-        @native_item = TkRoot.new { title options[:title] }
+        @native_item = TkToplevel.new { title options[:title] }
         apply_options(options)
       end
     end
@@ -177,7 +219,8 @@ module TkComponent
       canvas: Tk::Canvas,
       text: ::TkText,
       scale: Tk::Tile::Scale,
-      group: Tk::Tile::LabelFrame
+      group: Tk::Tile::LabelFrame,
+      tree: Tk::Tile::Treeview
     }
 
     ITEM_CLASSES = {
@@ -191,7 +234,9 @@ module TkComponent
       canvas: TkComponent::Builder::TkItem,
       text: TkComponent::Builder::TkText,
       scale: TkComponent::Builder::TkScale,
-      group: TkComponent::Builder::TkItem
+      group: TkComponent::Builder::TkItem,
+      tree: TkComponent::Builder::TkTree,
+      tree_node: TkComponent::Builder::TkTreeNode
     }
   end
 end
