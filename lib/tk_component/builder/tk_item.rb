@@ -174,7 +174,7 @@ module TkComponent
 
       def apply_options(options)
         super
-        return unless @column_defs.any?
+        return unless @column_defs.present?
         cols = @column_defs.map { |c| c[:key] }
         native_item.columns(cols.join(' '))
         @column_defs.each do |cd|
@@ -189,6 +189,15 @@ module TkComponent
         super unless option.to_sym == :column_defs
         @column_defs = v
       end
+
+      def set_event_handler(event_handler)
+        case event_handler.name
+        when :select
+          Event.bind_event('<TreeviewSelect>', self, event_handler.options, event_handler.lambda)
+        else
+          super
+        end
+      end
     end
 
     class TkTreeNode < TkItem
@@ -196,7 +205,9 @@ module TkComponent
         parent_node = options.delete(:parent) || ''
         parent_native_item = (parent_node == '' ? '' : parent_node.native_item)
         at = options.delete(:at)
+        selected = options.delete(:selected)
         @native_item = parent_item.native_item.insert(parent_native_item, at, options)
+        parent_item.native_item.selection_add(@native_item) if selected
         set_event_handlers(event_handlers)
       end
     end

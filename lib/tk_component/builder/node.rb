@@ -3,7 +3,7 @@ module TkComponent
 
     TK_CMDS = %w(label entry button canvas text scale group tree tree_node).to_set.freeze
     LAYOUT_CMDS = %w(frame hframe vframe row cell).to_set.freeze
-    EVENT_CMDS = %w(on_change on_mouse_down on_mouse_up on_mouse_drag on_mouse_wheel on_click on_event).to_set.freeze
+    EVENT_CMDS = %w(on_change on_mouse_down on_mouse_up on_mouse_drag on_mouse_wheel on_click on_select on_event).to_set.freeze
     TOKENS = (TK_CMDS + LAYOUT_CMDS + EVENT_CMDS).freeze
 
     class Node
