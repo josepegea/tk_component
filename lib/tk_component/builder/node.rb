@@ -36,7 +36,6 @@ module TkComponent
       end
 
       def short(level = 0)
-        puts(" " * level + " #{@name}")
         @sub_nodes.each do |n|
           n.short(level + 4)
         end

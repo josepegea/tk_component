@@ -34,11 +34,8 @@ module TkComponent
       end
 
       def apply_internal_grid(grid_map)
-        puts(grid_map)
         grid_map.column_indexes.each { |c| TkGrid.columnconfigure(self.native_item, c, weight: grid_map.column_weight(c)) }
         grid_map.row_indexes.each { |r| TkGrid.rowconfigure(self.native_item, r, weight: grid_map.row_weight(r)) }
-        # grid_map.column_indexes.each { |c| TkGrid.columnconfigure(self.native_item, c, weight: 1) }
-        # grid_map.row_indexes.each { |r| TkGrid.rowconfigure(self.native_item, r, weight: 1) }
       end
 
       def set_event_handlers(event_handlers)
@@ -148,6 +145,10 @@ module TkComponent
         native_item.insert('end', text)
       end
 
+      def select_range(from, to)
+        native_item.tag_add('sel', from, to)
+      end
+
       def set_event_handler(event_handler)
         case event_handler.name
         when :change
@@ -176,18 +177,24 @@ module TkComponent
         super
         return unless @column_defs.present?
         cols = @column_defs.map { |c| c[:key] }
-        native_item.columns(cols.join(' '))
+        native_item.columns(cols.join(' ')) unless cols == ['#0']
         @column_defs.each do |cd|
           column_conf = cd.slice(:width, :anchor)
-          native_item.column_configure(cd['key'], column_conf) unless column_conf.empty?
+          native_item.column_configure(cd[:key], column_conf) unless column_conf.empty?
           heading_conf = cd.slice(:text)
-          native_item.heading_configure(cd['key'], heading_conf) unless heading_conf.empty?
+          native_item.heading_configure(cd[:key], heading_conf) unless heading_conf.empty?
         end
       end
 
       def apply_option(option, v)
-        super unless option.to_sym == :column_defs
-        @column_defs = v
+        case option.to_sym
+        when :column_defs
+          @column_defs = v
+        when :heading
+          @column_defs = [ { key: '#0', text: v } ]
+        else
+          super
+        end
       end
 
       def set_event_handler(event_handler)
