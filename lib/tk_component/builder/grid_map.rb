@@ -35,10 +35,10 @@ module TkComponent
       end
 
       def set_weights(row, col, weights = {})
-        hw = weights[:h_weight]
-        @row_weights[row] = ((rw = @row_weights[row]).present? ? [rw, hw].max : hw) if hw
         vw = weights[:v_weight]
-        @column_weights[col] = ((cw = @column_weights[col]).present? ? [cw, vw].max : vw) if vw
+        @row_weights[row] = ((rw = @row_weights[row]).present? ? [rw, vw].max : vw) if vw
+        hw = weights[:h_weight]
+        @column_weights[col] = ((cw = @column_weights[col]).present? ? [cw, hw].max : hw) if hw
       end
 
       def row_indexes

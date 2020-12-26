@@ -6,6 +6,8 @@ module TkComponent
     EVENT_CMDS = %w(on_change on_mouse_down on_mouse_up on_mouse_drag on_mouse_wheel on_click on_select on_event).to_set.freeze
     TOKENS = (TK_CMDS + LAYOUT_CMDS + EVENT_CMDS).freeze
 
+    LAYOUT_OPTIONS = %i(column row rowspan columnspan sticky h_weight v_weight)
+
     class Node
       attr_accessor :name
       attr_accessor :options
@@ -43,10 +45,12 @@ module TkComponent
       end
 
       def insert_component(component_class, parent_component, options = {}, &block)
-        c_node = node_from_command(:frame, &block)
+        layout_options = options.slice(*LAYOUT_OPTIONS)
+        c_node = node_from_command(:frame, layout_options, &block)
         comp = component_class.new(options.merge(parent: parent_component, parent_node: c_node))
         comp.generate(parent_component, options)
         parent_component.add_child(comp)
+        comp
       end
 
       def add_event_handler(name, lambda, options = {})

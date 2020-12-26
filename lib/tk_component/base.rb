@@ -32,6 +32,10 @@ module TkComponent
       component_did_build
       children.each do |c|
         c.build(self)
+        TkGrid.columnconfigure c.parent_node.tk_item.native_item, 0, weight: 1
+        TkGrid.rowconfigure c.parent_node.tk_item.native_item, 0, weight: 1
+        TkGrid.columnconfigure c.node.tk_item.native_item, 0, weight: 1
+        TkGrid.rowconfigure c.node.tk_item.native_item, 0, weight: 1
       end
     end
 
