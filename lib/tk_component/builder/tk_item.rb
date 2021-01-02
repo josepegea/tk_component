@@ -19,18 +19,18 @@ module TkComponent
         set_event_handlers(event_handlers)
       end
 
-      def apply_options(options)
+      def apply_options(options, to_item = self.native_item)
         options.each do |k,v|
-          apply_option(k, v)
+          apply_option(k, v, to_item)
         end
       end
 
-      def apply_option(option, value)
-        self.native_item.public_send(option, value)
+      def apply_option(option, value, to_item = self.native_item)
+        to_item.public_send(option, value)
       end
 
-      def set_grid(grid)
-        self.native_item.grid(grid)
+      def set_grid(grid, to_item = self.native_item)
+        to_item.grid(grid)
       end
 
       def apply_internal_grid(grid_map)
@@ -55,7 +55,7 @@ module TkComponent
     end
 
     module ValueTyping
-      def apply_option(option, v)
+      def apply_option(option, v, to_item = self.native_item)
         case option.to_sym
         when :value
           self.value = v
@@ -124,8 +124,47 @@ module TkComponent
       end
     end
 
+    module Scrollable
+      ROOT_FRAME_OPTIONS = %i|width height relief borderwidth padx pady padding| + TkComponent::Builder::LAYOUT_OPTIONS
+
+      def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
+        return super unless (s_options = options.delete(:scrollers)) && s_options.present? && s_options != 'none'
+        tk_class = TK_CLASSES[name.to_sym]
+        raise "Don't know how to create #{name}" unless tk_class
+        frame_item = TK_CLASSES[:frame].new(parent_item.native_item) # Containing frame
+        real_native_item = tk_class.new(frame_item)
+        f_options = options.slice(ROOT_FRAME_OPTIONS)
+        apply_options(f_options, frame_item) # Apply the applicable options to the enclosing frame
+        @native_item = real_native_item
+        apply_options(options, real_native_item)
+        set_grid(grid, frame_item)
+        real_native_item.grid( :column => 0, :row => 0, :sticky => 'nwes')
+        if s_options.include?('x')
+          h_scrollbar = TK_CLASSES[:hscroll_bar].new(frame_item)
+          h_scrollbar.orient('horizontal')
+          h_scrollbar.command proc { |*args| real_native_item.xview(*args) }
+          real_native_item['xscrollcommand'] = proc { |*args| h_scrollbar.set(*args) }
+          h_scrollbar.grid( :column => 0, :row => 1, :sticky => 'wes')
+        end
+        if s_options.include?('y')
+          v_scrollbar =  TK_CLASSES[:vscroll_bar].new(frame_item)
+          v_scrollbar.orient('vertical')
+          v_scrollbar.command proc { |*args| real_native_item.yview(*args) }
+          real_native_item['yscrollcommand'] = proc { |*args| v_scrollbar.set(*args) }
+          v_scrollbar.grid( :column => 1, :row => 0, :sticky => 'nse')
+        end
+        TkGrid.columnconfigure(frame_item, 0, :weight => 1)
+        TkGrid.columnconfigure(frame_item, 1, :weight => 0) if v_scrollbar.present?
+        TkGrid.rowconfigure(frame_item, 0, :weight => 1)
+        TkGrid.rowconfigure(frame_item, 1, :weight => 0) if h_scrollbar.present?
+        @native_item = real_native_item
+        set_event_handlers(event_handlers)
+      end
+    end
+
     class TkText < TkItem
       include ValueTyping
+      include Scrollable
 
       def value
         native_item.get('1.0', 'end')
@@ -171,22 +210,23 @@ module TkComponent
     end
 
     class TkTree < TkItem
+      include Scrollable
       @column_defs = []
 
-      def apply_options(options)
+      def apply_options(options, to_item = self.native_item)
         super
         return unless @column_defs.present?
         cols = @column_defs.map { |c| c[:key] }
-        native_item.columns(cols.join(' ')) unless cols == ['#0']
+        to_item.columns(cols.join(' ')) unless cols == ['#0']
         @column_defs.each do |cd|
           column_conf = cd.slice(:width, :anchor)
-          native_item.column_configure(cd[:key], column_conf) unless column_conf.empty?
+          to_item.column_configure(cd[:key], column_conf) unless column_conf.empty?
           heading_conf = cd.slice(:text)
-          native_item.heading_configure(cd[:key], heading_conf) unless heading_conf.empty?
+          to_item.heading_configure(cd[:key], heading_conf) unless heading_conf.empty?
         end
       end
 
-      def apply_option(option, v)
+      def apply_option(option, v, to_item = self.native_item)
         case option.to_sym
         when :column_defs
           @column_defs = v
@@ -220,7 +260,7 @@ module TkComponent
     end
 
     class ScrollBar < TkItem
-      def apply_option(option, v)
+      def apply_option(option, v, to_item = self.native_item)
         case option.to_sym
         when :linked_to
           @linked_to = v
@@ -238,7 +278,7 @@ module TkComponent
         end
       end
 
-      def apply_options(options)
+      def apply_options(options, to_item = self.native_item)
         options.merge!(orient: orient)
         super
       end
