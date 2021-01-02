@@ -1,7 +1,7 @@
 module TkComponent
   module Builder
 
-    TK_CMDS = %w(label entry button canvas text scale group tree tree_node hscroll_bar vscroll_bar).to_set.freeze
+    TK_CMDS = %w(label entry button canvas text scale group tree tree_node hscroll_bar vscroll_bar hpaned vpaned).to_set.freeze
     LAYOUT_CMDS = %w(frame hframe vframe row cell).to_set.freeze
     EVENT_CMDS = %w(on_change on_mouse_down on_mouse_up on_mouse_drag on_mouse_wheel on_click on_select on_event).to_set.freeze
     TOKENS = (TK_CMDS + LAYOUT_CMDS + EVENT_CMDS).freeze
@@ -65,6 +65,7 @@ module TkComponent
           n.build(self, parent_component)
         end
         self.tk_item.apply_internal_grid(grid_map)
+        self.tk_item.built(parent_item)
       end
 
       def prepare_option_events(component)

@@ -11,12 +11,20 @@ module TkComponent
       end
 
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
-        tk_class = TK_CLASSES[name.to_sym]
-        raise "Don't know how to create #{name}" unless tk_class
-        @native_item = tk_class.new(parent_item.native_item)
+        @native_item = create_native_item(parent_item.native_item, name, options, grid, event_handlers)
         apply_options(options)
         set_grid(grid)
         set_event_handlers(event_handlers)
+      end
+
+      def create_native_item(parent_native_item, name, options = {}, grid = {}, event_handlers = [])
+        native_item_class(parent_native_item, name, options, grid, event_handlers).new(parent_native_item)
+      end
+
+      def native_item_class(parent_native_item, name, options = {}, grid = {}, event_handlers = [])
+        tk_class = TK_CLASSES[name.to_sym]
+        raise "Don't know how to create #{name}" unless tk_class.present?
+        return tk_class
       end
 
       def apply_options(options, to_item = self.native_item)
@@ -51,6 +59,9 @@ module TkComponent
         else
           Event.bind_event(event_handler.name, self, event_handler.options, event_handler.lambda)
         end
+      end
+
+      def built(parent_item)
       end
     end
 
@@ -129,10 +140,8 @@ module TkComponent
 
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
         return super unless (s_options = options.delete(:scrollers)) && s_options.present? && s_options != 'none'
-        tk_class = TK_CLASSES[name.to_sym]
-        raise "Don't know how to create #{name}" unless tk_class
         frame_item = TK_CLASSES[:frame].new(parent_item.native_item) # Containing frame
-        real_native_item = tk_class.new(frame_item)
+        real_native_item = create_native_item(frame_item, name, options, grid, event_handlers)
         f_options = options.slice(ROOT_FRAME_OPTIONS)
         apply_options(f_options, frame_item) # Apply the applicable options to the enclosing frame
         @native_item = real_native_item
@@ -354,6 +363,35 @@ module TkComponent
       end
     end
 
+    class PanedWindow < TkItem
+      def create_native_item(parent_native_item, name, options = {}, grid = {}, event_handlers = [])
+        native_item_class(parent_native_item, name, options, grid, event_handlers).new(parent_native_item, orient: orient)
+      end
+
+      def built(parent_item)
+        # We need to add all children items to the panned window
+        self.native_item.winfo_children.each do |child|
+          self.native_item.add(child)
+        end
+      end
+
+      def orient
+        raise "#{self.class.to_s} shouldn't be instantiated directly. Use 'H' or 'V' subclasses"
+      end
+    end
+
+    class HPanedWindow < PanedWindow
+      def orient
+        'horizontal'
+      end
+    end
+
+    class VPanedWindow < PanedWindow
+      def orient
+        'vertical'
+      end
+    end
+
     class TkWindow < TkItem
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
         @native_item = TkToplevel.new { title options[:title] }
@@ -375,7 +413,9 @@ module TkComponent
       group: Tk::Tile::LabelFrame,
       tree: Tk::Tile::Treeview,
       hscroll_bar: Tk::Tile::Scrollbar,
-      vscroll_bar: Tk::Tile::Scrollbar
+      vscroll_bar: Tk::Tile::Scrollbar,
+      hpaned: Tk::Tile::Paned,
+      vpaned: Tk::Tile::Paned
     }
 
     ITEM_CLASSES = {
@@ -393,7 +433,10 @@ module TkComponent
       tree: TkComponent::Builder::TkTree,
       tree_node: TkComponent::Builder::TkTreeNode,
       hscroll_bar: TkComponent::Builder::HScrollbar,
-      vscroll_bar: TkComponent::Builder::VScrollbar
+      vscroll_bar: TkComponent::Builder::VScrollbar,
+      hpaned: TkComponent::Builder::HPanedWindow,
+      vpaned: TkComponent::Builder::VPanedWindow
+
     }
   end
 end
