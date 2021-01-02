@@ -219,6 +219,101 @@ module TkComponent
       end
     end
 
+    class ScrollBar < TkItem
+      def apply_option(option, v)
+        case option.to_sym
+        when :linked_to
+          @linked_to = v
+        else
+          super
+        end
+      end
+
+      def set_event_handler(event_handler)
+        case event_handler.name
+        when :change
+          Event.Event.bind_command(event_handler.name, self, event_handler.options, event_handler.lambda)
+        else
+          super
+        end
+      end
+
+      def apply_options(options)
+        options.merge!(orient: orient)
+        super
+      end
+
+      def set_event_handlers(event_handlers)
+        bind_linked_to
+        super
+      end
+
+      def bind_linked_to
+        return unless @linked_to.present?
+        items = @linked_to.is_a?(Array) ? @linked_to.map(&:native_item) : [ @linked_to.native_item ]
+        self.native_item.command proc { |*args|
+          items.each do |item|
+            item.send(scroll_command, *args)
+          end
+        }
+        items.each do |item|
+          item.send(linked_scroll_command, proc { |*args| self.native_item.send(linked_scroll_event, *args) })
+        end
+      end
+
+      def orient
+        raise "#{self.class.to_s} shouldn't be instantiated directly. Use 'H' or 'V' subclasses"
+      end
+
+      def scroll_command
+        raise "#{self.class.to_s} shouldn't be instantiated directly. Use 'H' or 'V' subclasses"
+      end
+
+      def linked_scroll_command
+        raise "#{self.class.to_s} shouldn't be instantiated directly. Use 'H' or 'V' subclasses"
+      end
+
+      def linked_scroll_event
+        raise "#{self.class.to_s} shouldn't be instantiated directly. Use 'H' or 'V' subclasses"
+      end
+    end
+
+    class HScrollbar < ScrollBar
+      def orient
+        'horizontal'
+      end
+
+      def scroll_command
+        :xview
+      end
+
+      def linked_scroll_command
+        :xscrollcommand
+      end
+
+      def linked_scroll_event
+        :set
+      end
+    end
+
+    class VScrollbar < ScrollBar
+      def orient
+        'vertical'
+      end
+
+      def scroll_command
+        :yview
+      end
+
+      def linked_scroll_command
+        :yscrollcommand
+      end
+
+      def linked_scroll_event
+        :set
+      end
+    end
+
     class TkWindow < TkItem
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
         @native_item = TkToplevel.new { title options[:title] }
@@ -238,7 +333,9 @@ module TkComponent
       text: ::TkText,
       scale: Tk::Tile::Scale,
       group: Tk::Tile::LabelFrame,
-      tree: Tk::Tile::Treeview
+      tree: Tk::Tile::Treeview,
+      hscroll_bar: Tk::Tile::Scrollbar,
+      vscroll_bar: Tk::Tile::Scrollbar
     }
 
     ITEM_CLASSES = {
@@ -254,7 +351,9 @@ module TkComponent
       scale: TkComponent::Builder::TkScale,
       group: TkComponent::Builder::TkItem,
       tree: TkComponent::Builder::TkTree,
-      tree_node: TkComponent::Builder::TkTreeNode
+      tree_node: TkComponent::Builder::TkTreeNode,
+      hscroll_bar: TkComponent::Builder::HScrollbar,
+      vscroll_bar: TkComponent::Builder::VScrollbar
     }
   end
 end
