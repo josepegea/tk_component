@@ -260,6 +260,7 @@ module TkComponent
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
         parent_node = options.delete(:parent) || ''
         parent_native_item = (parent_node == '' ? '' : parent_node.native_item)
+        binding.pry if options[:at].to_s != 'end'
         at = options.delete(:at)
         selected = options.delete(:selected)
         @native_item = parent_item.native_item.insert(parent_native_item, at, options)
@@ -371,7 +372,7 @@ module TkComponent
       def built(parent_item)
         # We need to add all children items to the panned window
         self.native_item.winfo_children.each do |child|
-          self.native_item.add(child)
+          self.native_item.add(child, weight: 1)
         end
       end
 

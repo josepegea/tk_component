@@ -41,10 +41,13 @@ module TkComponent
 
     def regenerate
       old_node = @node
+      old_children = @children
+      @children = []
       generate(parent)
       rebuild(old_node)
-      children.each do |c|
-        c.regenerate
+      @children.each do |c|
+        c.generate(self)
+        c.build(self)
       end
     end
 
@@ -57,7 +60,7 @@ module TkComponent
     end
 
     def emit(event_name)
-      TkComponent::Builder::Event.emit('ParamChanged', parent_node.native_item, self.object_id)
+      TkComponent::Builder::Event.emit(event_name, parent_node.native_item, self.object_id)
     end
 
     def component_did_build
