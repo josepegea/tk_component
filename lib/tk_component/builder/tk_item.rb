@@ -98,13 +98,21 @@ module TkComponent
       attr_accessor :tk_variable
 
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
-        @tk_variable = TkVariable.new
+        create_variable
         super
-        self.native_item.public_send(variable_name, @tk_variable)
+        apply_variable
       end
 
       def variable_name
         :variable
+      end
+
+      def apply_variable
+        self.native_item&.public_send(variable_name, @tk_variable)
+      end
+
+      def create_variable
+        @tk_variable = TkVariable.new
       end
 
       delegate :value, to: :tk_variable
@@ -129,6 +137,39 @@ module TkComponent
         case event_handler.name
         when :change
           Event.bind_command(event_handler.name, self, event_handler.options, event_handler.lambda)
+        else
+          super
+        end
+      end
+    end
+
+    class TkRadioSet < TkItemWithVariable
+      # The variable for the radio set is only to be used by radio buttons inside it
+      # Thus, we don't try to link it to the actual item
+      def apply_variable
+      end
+    end
+
+    class TkRadioButton < TkItemWithVariable
+      # We need to use the tk_variable created by the parent_item
+      # So we set it here and skip creation below
+      def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
+        @tk_variable = parent_item.tk_variable
+        super
+      end
+
+      def create_variable
+      end
+
+      # It is unfortunate that native TK radio buttons use 'value' to
+      # spedify the value for each of them, colliding with the 'value'
+      # methods for our items with variables. Thus, we need to
+      # override the setting of the 'value' option to revert it to the
+      # default functionality
+      def apply_option(option, v, to_item = self.native_item)
+        case option.to_sym
+        when :value
+          to_item.public_send(option, v)
         else
           super
         end
@@ -408,6 +449,8 @@ module TkComponent
       label: Tk::Tile::Label,
       entry: Tk::Tile::Entry,
       button: Tk::Tile::Button,
+      radio_set: Tk::Tile::Frame,
+      radio_button: Tk::Tile::RadioButton,
       canvas: Tk::Canvas,
       text: ::TkText,
       scale: Tk::Tile::Scale,
@@ -427,6 +470,8 @@ module TkComponent
       label: TkComponent::Builder::TkItem,
       entry: TkComponent::Builder::TkEntry,
       button: TkComponent::Builder::TkItem,
+      radio_set: TkComponent::Builder::TkRadioSet,
+      radio_button: TkComponent::Builder::TkRadioButton,
       canvas: TkComponent::Builder::TkItem,
       text: TkComponent::Builder::TkText,
       scale: TkComponent::Builder::TkScale,
