@@ -10,6 +10,8 @@ module TkComponent
     attr_accessor :children
     attr_accessor :node
 
+    include BasicComponent
+
     def initialize(options = {})
       @parent = options[:parent]
       @parent_node = options[:parent_node]

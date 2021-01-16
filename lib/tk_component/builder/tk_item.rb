@@ -63,6 +63,10 @@ module TkComponent
 
       def built(parent_item)
       end
+
+      def focus
+        self.native_item.focus
+      end
     end
 
     module ValueTyping
@@ -228,6 +232,10 @@ module TkComponent
         ranges = native_item.tag_ranges('sel')
         return nil if ranges.empty?
         native_item.get(ranges.first.first, ranges.first.last)
+      end
+
+      def current_line
+        native_item.get('insert linestart', 'insert lineend')
       end
 
       def append_text(text)
@@ -436,8 +444,16 @@ module TkComponent
 
     class TkWindow < TkItem
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
-        @native_item = TkToplevel.new { title options[:title] }
+        if (options.delete(:root))
+          @native_item = TkRoot.new { title options[:title] }
+        else
+          @native_item = TkToplevel.new { title options[:title] }
+        end
         apply_options(options)
+      end
+
+      def focus
+        self.native_item.set_focus
       end
     end
 
