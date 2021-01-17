@@ -275,12 +275,13 @@ module TkComponent
         super
         return unless @column_defs.present?
         cols = @column_defs.map { |c| c[:key] }
-        to_item.columns(cols.join(' ')) unless cols == ['#0']
-        @column_defs.each do |cd|
+        to_item.columns(cols[1..-1].join(' ')) unless cols == ['#0']
+        @column_defs.each.with_index do |cd, idx|
+          key = idx == 0 ? '#0' : cd[:key]
           column_conf = cd.slice(:width, :anchor)
-          to_item.column_configure(cd[:key], column_conf) unless column_conf.empty?
+          to_item.column_configure(key, column_conf) unless column_conf.empty?
           heading_conf = cd.slice(:text)
-          to_item.heading_configure(cd[:key], heading_conf) unless heading_conf.empty?
+          to_item.heading_configure(key, heading_conf) unless heading_conf.empty?
         end
       end
 
@@ -299,6 +300,8 @@ module TkComponent
         case event_handler.name
         when :select
           Event.bind_event('<TreeviewSelect>', self, event_handler.options, event_handler.lambda)
+        when :item_open
+          Event.bind_event('<TreeviewOpen>', self, event_handler.options, event_handler.lambda)
         else
           super
         end
@@ -307,12 +310,12 @@ module TkComponent
 
     class TkTreeNode < TkItem
       def initialize(parent_item, name, options = {}, grid = {}, event_handlers = [])
-        parent_node = options.delete(:parent) || ''
+        item_options = options.dup
+        parent_node = item_options.delete(:parent) || ''
         parent_native_item = (parent_node == '' ? '' : parent_node.native_item)
-        binding.pry if options[:at].to_s != 'end'
-        at = options.delete(:at)
-        selected = options.delete(:selected)
-        @native_item = parent_item.native_item.insert(parent_native_item, at, options)
+        at = item_options.delete(:at)
+        selected = item_options.delete(:selected)
+        @native_item = parent_item.native_item.insert(parent_native_item, at, item_options)
         parent_item.native_item.selection_add(@native_item) if selected
         set_event_handlers(event_handlers)
       end

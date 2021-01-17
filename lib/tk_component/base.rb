@@ -29,6 +29,10 @@ module TkComponent
       @node = @node.sub_nodes.first # Get rid of the dummy top node
     end
 
+    def reparse_from_node(node, options = {})
+      yield(node)
+    end
+
     def build(parent_component)
       @node.build(@parent_node, parent_component)
       component_did_build
@@ -53,8 +57,23 @@ module TkComponent
       end
     end
 
+    def regenerate_from_node(node, parent_node, options = {}, &block)
+      old_children = @children.dup
+      reparse_from_node(node, options, &block)
+      new_children = @children - old_children
+      rebuild_from_node(node, parent_node, new_children)
+      new_children.each do |c|
+        c.generate(self)
+        c.build(self)
+      end
+    end
+
     def rebuild(old_node)
       build(parent)
+    end
+
+    def rebuild_from_node(node, parent_node, new_children)
+      node.build(parent_node, parent)
     end
 
     def name
