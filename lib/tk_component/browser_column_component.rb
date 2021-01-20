@@ -24,9 +24,9 @@ module TkComponent
         command = @browser.paned ? :hpaned : :hframe
         puts "Generating #{@column_index} - #{current_item}"
         p.send(command, sticky: 'nsew', h_weight: 1, v_weight: 1) do |f|
-          f.tree(sticky: 'nsew', h_weight: 1, v_weight: 1,
-                 on_select: :select_item,
-                 scrollers: 'y', heading: @browser.data_source.title_for_path(path_so_far, items)) do |t|
+          @tree = f.tree(sticky: 'nsew', h_weight: 1, v_weight: 1,
+                         on_select: :select_item,
+                         scrollers: 'y', heading: @browser.data_source.title_for_path(path_so_far, items)) do |t|
             items.each do |item|
               t.tree_node(at: 'end',
                           text: item,
@@ -49,6 +49,14 @@ module TkComponent
           end
         end
       end
+    end
+
+    def component_did_build
+      show_current_selection
+    end
+
+    def show_current_selection
+      @tree.tk_item.scroll_to_selection
     end
 
     def select_item(e)

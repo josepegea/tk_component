@@ -306,6 +306,18 @@ module TkComponent
           super
         end
       end
+
+      def scroll_to_selection
+        scroll_to_item(@native_item.selection.first)
+      end
+
+      # Right now it only works well for non-nested trees
+      def scroll_to_item(tree_item)
+        return unless tree_item.present?
+        items = @native_item.children('')
+        rel_pos = items.index(tree_item).to_f / items.size.to_f
+        @native_item.after(200) { @native_item.yview_moveto(rel_pos) }
+      end
     end
 
     class TkTreeNode < TkItem

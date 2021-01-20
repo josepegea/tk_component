@@ -47,8 +47,19 @@ module TkComponent
       end
     end
 
+    def selected_item
+      (tree_item = @tree.native_item.focus_item) && tree_item_to_item(tree_item)
+    end
+
     def item_to_options(item)
       { text: item[text_key], values: item.slice(*values_keys).values }
+    end
+
+    def tree_item_to_item(tree_item)
+      columns.map.with_index do |c, i|
+        [c[:key],
+         i == 0 ? tree_item.text : tree_item.get(c[:key])]
+      end.to_h
     end
 
     def item_open(e)
