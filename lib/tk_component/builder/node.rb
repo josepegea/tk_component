@@ -6,7 +6,7 @@ module TkComponent
     EVENT_CMDS = %w(on_change on_mouse_down on_mouse_up on_mouse_drag on_mouse_wheel on_click on_select on_item_open on_event).to_set.freeze
     TOKENS = (TK_CMDS + LAYOUT_CMDS + EVENT_CMDS).freeze
 
-    LAYOUT_OPTIONS = %i(column row rowspan columnspan sticky h_weight v_weight)
+    LAYOUT_OPTIONS = %i(column row rowspan columnspan sticky x_flex y_flex)
 
     class Node
       attr_accessor :name
@@ -99,7 +99,7 @@ module TkComponent
             rowspan = grid[:rowspan] || 1
             columnspan = grid[:columnspan] || 1
             grid_map.fill(current_row, current_col, rowspan, columnspan, true)
-            weights = n.options.extract!(:h_weight, :v_weight)
+            weights = n.options.extract!(:x_flex, :y_flex)
             grid_map.set_weights(current_row, current_col, weights)
             n.prepare_grid
             final_sub_nodes << n

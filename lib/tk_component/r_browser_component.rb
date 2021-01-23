@@ -21,7 +21,7 @@ module TkComponent
         p.insert_component(TkComponent::BrowserColumnComponent, self,
                            browser: self,
                            column_index: 0,
-                           sticky: 'nsew', h_weight: 1, v_weight: 1) do |bc|
+                           sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
           bc.on_event 'ItemSelected', ->(e) do
             puts "ItemSelected"
             emit('PathChanged')

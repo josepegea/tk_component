@@ -23,8 +23,8 @@ module TkComponent
         end
         command = @browser.paned ? :hpaned : :hframe
         puts "Generating #{@column_index} - #{current_item}"
-        p.send(command, sticky: 'nsew', h_weight: 1, v_weight: 1) do |f|
-          @tree = f.tree(sticky: 'nsew', h_weight: 1, v_weight: 1,
+        p.send(command, sticky: 'nsew', x_flex: 1, y_flex: 1) do |f|
+          @tree = f.tree(sticky: 'nsew', x_flex: 1, y_flex: 1,
                          on_select: :select_item,
                          scrollers: 'y', heading: @browser.data_source.title_for_path(path_so_far, items)) do |t|
             items.each do |item|
@@ -35,11 +35,11 @@ module TkComponent
           end
           if (@browser.max_columns.blank? || @browser.max_columns > @column_index + 1) &&
              (@column_index < @browser.selected_path.size || items.present?)               
-            f.hframe(sticky: 'nsew', h_weight: 1, v_weight: 1) do |hf|
+            f.hframe(sticky: 'nsew', x_flex: 1, y_flex: 1) do |hf|
               @next_column = hf.insert_component(TkComponent::BrowserColumnComponent, self,
                                                  browser: @browser,
                                                  column_index: @column_index + 1,
-                                                 sticky: 'nsew', h_weight: 1, v_weight: 1) do |bc|
+                                                 sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
                 bc.on_event 'ItemSelected', ->(e) do
                   puts "ItemSelected"
                   emit('ItemSelected')

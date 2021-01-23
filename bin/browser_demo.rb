@@ -26,12 +26,12 @@ end
 class DemoRoot < TkComponent::Base
   def generate(parent_component, options = {})
     parse_component(parent_component, options) do |p|
-      p.vframe(sticky: 'wens', h_weight: 1, v_weight: 1) do |f|
+      p.vframe(sticky: 'wens', x_flex: 1, y_flex: 1) do |f|
         f.label(text: "Directory of #{DataSource.shared.title_for_path(nil, [])}")
         f.insert_component(TkComponent::RBrowserComponent, self,
                            data_source: DataSource.shared,
                            paned: false,
-                           sticky: 'nsew', h_weight: 1, v_weight: 1) do |bc|
+                           sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
           bc.on_event'PathChanged', ->(e) do
             puts "PathChanged: " + e.data_object.selected_path.to_s
           end

@@ -42,7 +42,7 @@ end
 class DemoRoot < TkComponent::Base
   def generate(parent_component, options = {})
     parse_component(parent_component, options) do |p|
-      p.vframe(sticky: 'wens', h_weight: 1, v_weight: 1) do |f|
+      p.vframe(sticky: 'wens', x_flex: 1, y_flex: 1) do |f|
         f.label(text: "Directory of #{ENV['HOME']}")
         f.insert_component(TkComponent::TableViewComponent, self,
                            data_source: DataSource.shared,
@@ -52,7 +52,7 @@ class DemoRoot < TkComponent::Base
                            ],
                            nested: true,
                            lazy: true,
-                           sticky: 'nsew', h_weight: 1, v_weight: 1)
+                           sticky: 'nsew', x_flex: 1, y_flex: 1)
       end
     end
   end

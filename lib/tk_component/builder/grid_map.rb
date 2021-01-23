@@ -35,9 +35,9 @@ module TkComponent
       end
 
       def set_weights(row, col, weights = {})
-        vw = weights[:v_weight]
+        vw = weights[:y_flex]
         @row_weights[row] = ((rw = @row_weights[row]).present? ? [rw, vw].max : vw) if vw
-        hw = weights[:h_weight]
+        hw = weights[:x_flex]
         @column_weights[col] = ((cw = @column_weights[col]).present? ? [cw, hw].max : hw) if hw
       end
 
