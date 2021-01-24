@@ -68,6 +68,10 @@ module TkComponent
         self.tk_item.built(parent_item)
       end
 
+      def remove
+        self.tk_item.remove
+      end
+
       def prepare_option_events(component)
         option_events = options.extract!(*EVENT_CMDS)
         option_events.each do |k, v|

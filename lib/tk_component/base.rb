@@ -29,8 +29,10 @@ module TkComponent
       @node = @node.sub_nodes.first # Get rid of the dummy top node
     end
 
-    def reparse_from_node(node, options = {})
-      yield(node)
+    def parse_node(parent_node, options = {})
+      yield(parent_node)
+      parent_node.prepare_option_events(self)
+      parent_node.prepare_grid
     end
 
     def build(parent_component)
@@ -59,9 +61,42 @@ module TkComponent
 
     def regenerate_from_node(node, parent_node, options = {}, &block)
       old_children = @children.dup
-      reparse_from_node(node, options, &block)
+      old_sub_nodes = parent_node.sub_nodes.dup
+      # Remove this node and nodes after it
+      to_remove = parent_node.sub_nodes.slice!(parent_node.sub_nodes.index(node)..-1)
+      to_remove.each do |n|
+        n.remove
+      end
+      parse_node(parent_node, options, &block)
       new_children = @children - old_children
-      rebuild_from_node(node, parent_node, new_children)
+      new_sub_nodes = parent_node.sub_nodes - old_sub_nodes
+      new_sub_nodes.each do |n|
+        # n.prepare_option_events(self)
+        # n.prepare_grid
+        n.build(parent_node, self)
+      end
+      new_children.each do |c|
+        c.generate(self)
+        c.build(self)
+      end
+    end
+
+    def regenerate_after_node(node, parent_node, options = {}, &block)
+      old_children = @children.dup
+      old_sub_nodes = parent_node.sub_nodes.dup
+      # Remove nodes after this one
+      to_remove = parent_node.sub_nodes.slice!(parent_node.sub_nodes.index(node) + 1..-1)
+      to_remove.each do |n|
+        n.remove
+      end
+      parse_node(parent_node, options, &block)
+      new_children = @children - old_children
+      new_sub_nodes = parent_node.sub_nodes - old_sub_nodes
+      new_sub_nodes.each do |n|
+        # n.prepare_option_events(self)
+        # n.prepare_grid
+        n.build(parent_node, self)
+      end
       new_children.each do |c|
         c.generate(self)
         c.build(self)
@@ -72,9 +107,11 @@ module TkComponent
       build(parent)
     end
 
-    def rebuild_from_node(node, parent_node, new_children)
-      node.build(parent_node, parent)
-    end
+    # def rebuild_from_node(node, parent_node, new_children)
+    #   parent_node.sub_nodes.slice(parent_node.sub_nodes.index(node)..-1).each do |n|
+    #     n.build(parent_node, parent)
+    #   end
+    # end
 
     def name
       self.class.name

@@ -27,6 +27,10 @@ module TkComponent
         return tk_class
       end
 
+      def remove
+        @native_item.destroy
+      end
+
       def apply_options(options, to_item = self.native_item)
         options.each do |k,v|
           apply_option(k, v, to_item)
@@ -187,7 +191,7 @@ module TkComponent
         return super unless (s_options = options.delete(:scrollers)) && s_options.present? && s_options != 'none'
         frame_item = TK_CLASSES[:frame].new(parent_item.native_item) # Containing frame
         real_native_item = create_native_item(frame_item, name, options, grid, event_handlers)
-        f_options = options.slice(ROOT_FRAME_OPTIONS)
+        f_options = options.extract!(*ROOT_FRAME_OPTIONS)
         apply_options(f_options, frame_item) # Apply the applicable options to the enclosing frame
         @native_item = real_native_item
         apply_options(options, real_native_item)
@@ -213,6 +217,11 @@ module TkComponent
         TkGrid.rowconfigure(frame_item, 1, :weight => 0) if h_scrollbar.present?
         @native_item = real_native_item
         set_event_handlers(event_handlers)
+      end
+
+      # We need to remove the parent native item, as it's the container we put in place initially
+      def remove
+        @native_item.winfo_parent.destroy
       end
     end
 

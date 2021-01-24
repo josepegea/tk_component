@@ -28,7 +28,7 @@ class DemoRoot < TkComponent::Base
     parse_component(parent_component, options) do |p|
       p.vframe(sticky: 'wens', x_flex: 1, y_flex: 1) do |f|
         f.label(text: "Directory of #{DataSource.shared.title_for_path(nil, [])}")
-        f.insert_component(TkComponent::RBrowserComponent, self,
+        f.insert_component(TkComponent::BrowserComponent, self,
                            data_source: DataSource.shared,
                            paned: false,
                            sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
@@ -41,7 +41,7 @@ class DemoRoot < TkComponent::Base
   end
 end
 
-@tk_root = TkComponent::Window.new(title: "BrowserComponent Demo")
+@tk_root = TkComponent::Window.new(title: "BrowserComponent Demo", root: true)
 @main_component = DemoRoot.new
 @tk_root.place_root_component(@main_component)
 
