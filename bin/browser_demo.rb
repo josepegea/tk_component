@@ -30,7 +30,7 @@ class DemoRoot < TkComponent::Base
         f.label(text: "Directory of #{DataSource.shared.title_for_path(nil, [])}")
         f.insert_component(TkComponent::BrowserComponent, self,
                            data_source: DataSource.shared,
-                           paned: false,
+                           paned: true,
                            sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
           bc.on_event'PathChanged', ->(e) do
             puts "PathChanged: " + e.data_object.selected_path.to_s

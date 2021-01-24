@@ -29,10 +29,13 @@ module TkComponent
       @node = @node.sub_nodes.first # Get rid of the dummy top node
     end
 
-    def parse_node(parent_node, options = {})
+    def parse_nodes(parent_node, options = {})
+      old_sub_nodes = parent_node.sub_nodes.dup
       yield(parent_node)
-      parent_node.prepare_option_events(self)
+      new_sub_nodes = parent_node.sub_nodes - old_sub_nodes
+      new_sub_nodes.each { |n| n.prepare_option_events(self) }
       parent_node.prepare_grid
+      new_sub_nodes
     end
 
     def build(parent_component)
@@ -60,58 +63,35 @@ module TkComponent
     end
 
     def regenerate_from_node(node, parent_node, options = {}, &block)
-      old_children = @children.dup
-      old_sub_nodes = parent_node.sub_nodes.dup
-      # Remove this node and nodes after it
-      to_remove = parent_node.sub_nodes.slice!(parent_node.sub_nodes.index(node)..-1)
-      to_remove.each do |n|
-        n.remove
-      end
-      parse_node(parent_node, options, &block)
-      new_children = @children - old_children
-      new_sub_nodes = parent_node.sub_nodes - old_sub_nodes
-      new_sub_nodes.each do |n|
-        # n.prepare_option_events(self)
-        # n.prepare_grid
-        n.build(parent_node, self)
-      end
-      new_children.each do |c|
-        c.generate(self)
-        c.build(self)
-      end
+      regenerate_from_index(parent_node, parent_node.sub_nodes.index(node), options, &block)
     end
 
     def regenerate_after_node(node, parent_node, options = {}, &block)
+      regenerate_from_index(parent_node, parent_node.sub_nodes.index(node) + 1, options, &block)
+    end
+
+    def regenerate_from_index(parent_node, index, options = {}, &block)
       old_children = @children.dup
-      old_sub_nodes = parent_node.sub_nodes.dup
-      # Remove nodes after this one
-      to_remove = parent_node.sub_nodes.slice!(parent_node.sub_nodes.index(node) + 1..-1)
+      to_remove = parent_node.sub_nodes.slice!(index..-1)
       to_remove.each do |n|
         n.remove
       end
-      parse_node(parent_node, options, &block)
+      new_sub_nodes = parse_nodes(parent_node, options, &block)
       new_children = @children - old_children
-      new_sub_nodes = parent_node.sub_nodes - old_sub_nodes
       new_sub_nodes.each do |n|
-        # n.prepare_option_events(self)
-        # n.prepare_grid
         n.build(parent_node, self)
       end
       new_children.each do |c|
         c.generate(self)
         c.build(self)
       end
+      parent_node.apply_grid
+      parent_node.built
     end
 
     def rebuild(old_node)
       build(parent)
     end
-
-    # def rebuild_from_node(node, parent_node, new_children)
-    #   parent_node.sub_nodes.slice(parent_node.sub_nodes.index(node)..-1).each do |n|
-    #     n.build(parent_node, parent)
-    #   end
-    # end
 
     def name
       self.class.name

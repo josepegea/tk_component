@@ -42,6 +42,9 @@ module TkComponent
     end
 
     def select_item(sender, index)
+      # If we don't do this update sometimes the selection is not
+      # updated until some later event, like a mouse drag
+      Tk.update
       item = sender.native_item.selection&.first.text.to_s
       return if selected_path[index] == item
       selected_path[index] = item

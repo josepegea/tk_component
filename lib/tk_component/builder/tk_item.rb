@@ -65,7 +65,7 @@ module TkComponent
         end
       end
 
-      def built(parent_item)
+      def built
       end
 
       def focus
@@ -442,10 +442,15 @@ module TkComponent
         native_item_class(parent_native_item, name, options, grid, event_handlers).new(parent_native_item, orient: orient)
       end
 
-      def built(parent_item)
-        # We need to add all children items to the panned window
-        self.native_item.winfo_children.each do |child|
+      def built
+        # We need to synchronize children items to the panned window
+        added_panes = self.native_item.winfo_children - self.native_item.panes
+        removed_panes = self.native_item.panes - self.native_item.winfo_children
+        added_panes.each do |child|
           self.native_item.add(child, weight: 1)
+        end
+        removed_panes.each do |child|
+          self.native_item.forget(child)
         end
       end
 

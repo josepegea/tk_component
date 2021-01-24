@@ -13,6 +13,7 @@ module TkComponent
       attr_accessor :options
       attr_accessor :sub_nodes
       attr_accessor :grid
+      attr_accessor :weights
       attr_accessor :grid_map
       attr_accessor :event_handlers
       attr_accessor :tk_item
@@ -31,7 +32,8 @@ module TkComponent
         @name = name
         @options = options.with_indifferent_access
         @sub_nodes = []
-        @grid = {}
+        @grid = {}.with_indifferent_access
+        @weights = {}.with_indifferent_access
         @grid_map = GridMap.new
         @event_handlers = []
         @tk_item = nil
@@ -64,8 +66,19 @@ module TkComponent
         sub_nodes.each do |n|
           n.build(self, parent_component)
         end
+        apply_grid
+        built
+      end
+
+      def apply_grid
         self.tk_item.apply_internal_grid(grid_map)
-        self.tk_item.built(parent_item)
+      end
+
+      def built
+        self.tk_item.built
+      end
+
+      def rebuilt
       end
 
       def remove
@@ -82,6 +95,7 @@ module TkComponent
       end
 
       def prepare_grid
+        self.grid_map = GridMap.new
         return unless self.sub_nodes.any?
         current_row = -1
         current_col = -1
@@ -98,13 +112,15 @@ module TkComponent
             current_col = 0 if current_col < 0
             current_row, current_col = grid_map.get_next_cell(current_row, current_col, going_down)
             binding.pry if n.options.nil?
-            grid = n.options.extract!(:column, :row, :rowspan, :columnspan, :sticky)
-            n.grid = grid.merge(column: current_col, row: current_row)
-            rowspan = grid[:rowspan] || 1
-            columnspan = grid[:columnspan] || 1
+            n.grid = {}.with_indifferent_access if n.grid.nil?
+            n.grid.merge!(n.options.extract!(:column, :row, :rowspan, :columnspan, :sticky))
+            n.grid.merge!(column: current_col, row: current_row)
+            rowspan = n.grid[:rowspan] || 1
+            columnspan = n.grid[:columnspan] || 1
             grid_map.fill(current_row, current_col, rowspan, columnspan, true)
-            weights = n.options.extract!(:x_flex, :y_flex)
-            grid_map.set_weights(current_row, current_col, weights)
+            n.weights = {}.with_indifferent_access if n.weights.nil?
+            n.weights.merge!(n.options.extract!(:x_flex, :y_flex))
+            grid_map.set_weights(current_row, current_col, n.weights)
             n.prepare_grid
             final_sub_nodes << n
           end
