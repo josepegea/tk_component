@@ -67,6 +67,7 @@ module TkComponent
     end
 
     def regenerate_after_node(node, parent_node, options = {}, &block)
+      return if parent_node.sub_nodes.index(node).nil?
       regenerate_from_index(parent_node, parent_node.sub_nodes.index(node) + 1, options, &block)
     end
 

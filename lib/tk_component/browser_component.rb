@@ -16,6 +16,7 @@ module TkComponent
     def generate(parent_component, options = {})
       parse_component(parent_component, options) do |p|
         partial_path = []
+        @trees = []
         p.vframe(sticky: 'nsew', x_flex: 1, y_flex: 1) do |vf|
           command = @paned ? :hpaned : :hframe
           @trees_container = vf.send(command, sticky: 'nsew', x_flex: 1, y_flex: 1) do |f|
@@ -53,7 +54,9 @@ module TkComponent
       regenerate_after_node(@trees[index], @trees_container) do |container|
         generate_from_level(container, index + 1)
       end
+      Tk.update
       emit('PathChanged')
+      Tk.update
     end
   end
 end
