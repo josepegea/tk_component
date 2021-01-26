@@ -22,7 +22,6 @@ module TkComponent
           current_item = nil
         end
         command = @browser.paned ? :hpaned : :hframe
-        puts "Generating #{@column_index} - #{current_item}"
         p.send(command, sticky: 'nsew', x_flex: 1, y_flex: 1) do |f|
           @tree = f.tree(sticky: 'nsew', x_flex: 1, y_flex: 1,
                          on_select: :select_item,
@@ -41,7 +40,6 @@ module TkComponent
                                                  column_index: @column_index + 1,
                                                  sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
                 bc.on_event 'ItemSelected', ->(e) do
-                  puts "ItemSelected"
                   emit('ItemSelected')
                 end
               end
