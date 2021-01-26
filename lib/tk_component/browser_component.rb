@@ -26,6 +26,10 @@ module TkComponent
       end
     end
 
+    def show_current_selection
+      @trees.each { |t| t.tk_item.scroll_to_selection }
+    end
+
     def generate_from_level(container, start_index)
       (start_index..selected_path.size).each do |idx|
         next_in_path = selected_path[idx]
