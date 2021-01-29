@@ -17,15 +17,13 @@ module TkComponent
       @to_load = {}
     end
 
-    def generate(parent_component, options = {})
+    def render(p, parent_component)
       @to_load = {}
-      parse_component(parent_component, options) do |p|
-        @tree = p.tree(sticky: 'nsew', x_flex: 1, y_flex: 1, scrollers: @scrollers,
-                       column_defs: columns,
-                       on_item_open: :item_open,
-                       on_select: :item_selected
-                      )
-      end
+      @tree = p.tree(sticky: 'nsew', x_flex: 1, y_flex: 1, scrollers: @scrollers,
+                     column_defs: columns,
+                     on_item_open: :item_open,
+                     on_select: :item_selected
+                    )
     end
 
     def component_did_build

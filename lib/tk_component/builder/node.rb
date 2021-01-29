@@ -50,7 +50,7 @@ module TkComponent
         layout_options = options.slice(*LAYOUT_OPTIONS)
         c_node = node_from_command(:frame, layout_options, &block)
         comp = component_class.new(options.merge(parent: parent_component, parent_node: c_node))
-        comp.generate(parent_component, options)
+        comp.generate(parent_component)
         parent_component.add_child(comp)
         comp
       end

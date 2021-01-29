@@ -40,20 +40,18 @@ class DataSource
 end
 
 class DemoRoot < TkComponent::Base
-  def generate(parent_component, options = {})
-    parse_component(parent_component, options) do |p|
-      p.vframe(sticky: 'wens', x_flex: 1, y_flex: 1) do |f|
-        f.label(text: "Directory of #{ENV['HOME']}")
-        f.insert_component(TkComponent::TableViewComponent, self,
-                           data_source: DataSource.shared,
-                           columns: [
-                             { key: :name, text: 'Name' },
-                             { key: :size, text: 'Size' }
-                           ],
-                           nested: true,
-                           lazy: true,
-                           sticky: 'nsew', x_flex: 1, y_flex: 1)
-      end
+  def render(p, parent_component)
+    p.vframe(sticky: 'wens', x_flex: 1, y_flex: 1) do |f|
+      f.label(text: "Directory of #{ENV['HOME']}")
+      f.insert_component(TkComponent::TableViewComponent, self,
+                         data_source: DataSource.shared,
+                         columns: [
+                           { key: :name, text: 'Name' },
+                           { key: :size, text: 'Size' }
+                         ],
+                         nested: true,
+                         lazy: true,
+                         sticky: 'nsew', x_flex: 1, y_flex: 1)
     end
   end
 end

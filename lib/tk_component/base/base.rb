@@ -18,9 +18,19 @@ module TkComponent
       @children = []
     end
 
-    def parse_component(parent_component, options = {})
+    def render(p, parent_component)
+      raise "Component #{self.class.to_s} needs to have a 'render' method"
+    end
+
+    def generate(parent_component)
+      parse_component(parent_component) do |p|
+        render(p, parent_component)
+      end
+    end
+
+    def parse_component(parent_component)
       raise "You need to provide a block" unless block_given?
-      @node = Builder::Node.new(:top, options)
+      @node = Builder::Node.new(:top)
       yield(@node)
       binding.pry if @node.sub_nodes.size != 1
       raise "Components need to have a single root node" unless @node.sub_nodes.size == 1
@@ -62,22 +72,22 @@ module TkComponent
       end
     end
 
-    def regenerate_from_node(node, parent_node, options = {}, &block)
-      regenerate_from_index(parent_node, parent_node.sub_nodes.index(node), options, &block)
+    def regenerate_from_node(node, parent_node, &block)
+      regenerate_from_index(parent_node, parent_node.sub_nodes.index(node), &block)
     end
 
-    def regenerate_after_node(node, parent_node, options = {}, &block)
+    def regenerate_after_node(node, parent_node, &block)
       return if parent_node.sub_nodes.index(node).nil?
-      regenerate_from_index(parent_node, parent_node.sub_nodes.index(node) + 1, options, &block)
+      regenerate_from_index(parent_node, parent_node.sub_nodes.index(node) + 1, &block)
     end
 
-    def regenerate_from_index(parent_node, index, options = {}, &block)
+    def regenerate_from_index(parent_node, index, &block)
       old_children = @children.dup
       to_remove = parent_node.sub_nodes.slice!(index..-1)
       to_remove.each do |n|
         n.remove
       end
-      new_sub_nodes = parse_nodes(parent_node, options, &block)
+      new_sub_nodes = parse_nodes(parent_node, &block)
       new_children = @children - old_children
       new_sub_nodes.each do |n|
         n.build(parent_node, self)

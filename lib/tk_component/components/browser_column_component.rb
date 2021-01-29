@@ -10,38 +10,36 @@ module TkComponent
       @column_index = options[:column_index] || 0
     end
 
-    def generate(parent_component, options = {})
-      parse_component(parent_component, options) do |p|
-        if @column_index <= @browser.selected_path.size
-          current_item = @browser.selected_path[@column_index]
-          path_so_far = @browser.selected_path.slice(0, @column_index)
-          items = @browser.data_source.items_for_path(path_so_far)
-          items ||= []
-        else
-          items = []
-          current_item = nil
-        end
-        command = @browser.paned ? :hpaned : :hframe
-        p.send(command, sticky: 'nsew', x_flex: 1, y_flex: 1) do |f|
-          @tree = f.tree(sticky: 'nsew', x_flex: 1, y_flex: 1,
-                         on_select: :select_item,
-                         scrollers: 'y', heading: @browser.data_source.title_for_path(path_so_far, items)) do |t|
-            items.each do |item|
-              t.tree_node(at: 'end',
-                          text: item,
-                          selected: item == current_item)
-            end
+    def render(p, parent_component)
+      if @column_index <= @browser.selected_path.size
+        current_item = @browser.selected_path[@column_index]
+        path_so_far = @browser.selected_path.slice(0, @column_index)
+        items = @browser.data_source.items_for_path(path_so_far)
+        items ||= []
+      else
+        items = []
+        current_item = nil
+      end
+      command = @browser.paned ? :hpaned : :hframe
+      p.send(command, sticky: 'nsew', x_flex: 1, y_flex: 1) do |f|
+        @tree = f.tree(sticky: 'nsew', x_flex: 1, y_flex: 1,
+                       on_select: :select_item,
+                       scrollers: 'y', heading: @browser.data_source.title_for_path(path_so_far, items)) do |t|
+          items.each do |item|
+            t.tree_node(at: 'end',
+                        text: item,
+                        selected: item == current_item)
           end
-          if (@browser.max_columns.blank? || @browser.max_columns > @column_index + 1) &&
-             (@column_index < @browser.selected_path.size || items.present?)               
-            f.hframe(sticky: 'nsew', x_flex: 1, y_flex: 1) do |hf|
-              @next_column = hf.insert_component(TkComponent::BrowserColumnComponent, self,
-                                                 browser: @browser,
-                                                 column_index: @column_index + 1,
-                                                 sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
-                bc.on_event 'ItemSelected', ->(e) do
-                  emit('ItemSelected')
-                end
+        end
+        if (@browser.max_columns.blank? || @browser.max_columns > @column_index + 1) &&
+           (@column_index < @browser.selected_path.size || items.present?)               
+          f.hframe(sticky: 'nsew', x_flex: 1, y_flex: 1) do |hf|
+            @next_column = hf.insert_component(TkComponent::BrowserColumnComponent, self,
+                                               browser: @browser,
+                                               column_index: @column_index + 1,
+                                               sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
+              bc.on_event 'ItemSelected', ->(e) do
+                emit('ItemSelected')
               end
             end
           end

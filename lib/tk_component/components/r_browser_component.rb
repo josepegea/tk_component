@@ -16,16 +16,14 @@ module TkComponent
       @max_columns = options[:max_columns]
     end
 
-    def generate(parent_component, options = {})
-      parse_component(parent_component, options) do |p|
-        p.insert_component(TkComponent::BrowserColumnComponent, self,
-                           browser: self,
-                           column_index: 0,
-                           sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
-          bc.on_event 'ItemSelected', ->(e) do
-            puts "ItemSelected"
-            emit('PathChanged')
-          end
+    def render(p, parent_component)
+      p.insert_component(TkComponent::BrowserColumnComponent, self,
+                         browser: self,
+                         column_index: 0,
+                         sticky: 'nsew', x_flex: 1, y_flex: 1) do |bc|
+        bc.on_event 'ItemSelected', ->(e) do
+          puts "ItemSelected"
+          emit('PathChanged')
         end
       end
     end

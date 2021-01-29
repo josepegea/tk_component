@@ -13,15 +13,13 @@ module TkComponent
       @trees = []
     end
 
-    def generate(parent_component, options = {})
-      parse_component(parent_component, options) do |p|
-        partial_path = []
-        @trees = []
-        p.vframe(sticky: 'nsew', x_flex: 1, y_flex: 1) do |vf|
-          command = @paned ? :hpaned : :hframe
-          @trees_container = vf.send(command, sticky: 'nsew', x_flex: 1, y_flex: 1) do |f|
-            generate_from_level(f, 0)
-          end
+    def render(p, parent_component)
+      partial_path = []
+      @trees = []
+      p.vframe(sticky: 'nsew', x_flex: 1, y_flex: 1) do |vf|
+        command = @paned ? :hpaned : :hframe
+        @trees_container = vf.send(command, sticky: 'nsew', x_flex: 1, y_flex: 1) do |f|
+          generate_from_level(f, 0)
         end
       end
     end
