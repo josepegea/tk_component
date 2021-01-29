@@ -1,6 +1,8 @@
 # TkComponent
 
-TkComponent allows you to create desktop UIs using a component structure taking advantadge of TK, the UI toolkit created for TCL and used by Python in TkInter
+TkComponent allows you to create desktop UIs in Ruby, using a component
+structure taking advantadge of TK, the UI toolkit created for TCL and
+used by Python in TkInter.
 
 Still very much a work in progress.
 
