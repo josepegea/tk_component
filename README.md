@@ -1,7 +1,7 @@
 # TkComponent
 
 TkComponent allows you to create desktop UIs in Ruby, using a component
-structure taking advantadge of TK, the UI toolkit created for TCL and
+structure taking advantadge of Tk, the UI toolkit created for TCL and
 used by Python in TkInter.
 
 ![GIF demo](https://i.ibb.co/FVmNdCV/Teaser.gif)
@@ -93,7 +93,7 @@ Tk.mainloop
 
 More details to come!
 
-## Ruby/TK docs
+## Ruby/Tk docs
 
 TkComponent is a layer on top of Tk, but it still uses native Tk
 concepts and calls, so you'll need to be familiar with that.
@@ -106,7 +106,7 @@ Sources of documentation:
 
 - https://www.tutorialspoint.com/ruby/ruby_tk_guide.htm
 
-- https://tcl.tk/man/tcl8.6/TkCmd/contents.htm (General TK ref)
+- https://tcl.tk/man/tcl8.6/TkCmd/contents.htm (General Tk ref)
 
 ## Installing Tk
 
@@ -151,13 +151,13 @@ Josep Egea
 
 ## Why this?
 
-I feel that Ruby is a fantastic language for building GUIs.
+I feel that Ruby is a fantastic language for building GUI's.
 
-It's expressive, flexible and easy to read. GUIs spend most of their
+It's expressive, flexible and easy to read. GUI's spend most of their
 time waiting for user input, so the actual performance of the language
 is not as important as the power it gives to the developer. To that
-avail, Ruby is a great fit, a true successor of Smalltalk, which had
-a great GUI integration.
+avail, Ruby is a great fit, a true successor of Smalltalk, which was
+tightly integrated with a great GUI.
 
 However, there's not much current GUI work in Ruby land. Most of
 developments happen in server side code, APIs and, of course, Rails.
