@@ -83,7 +83,9 @@ module TkComponent
       EVENT_ALIASES = {
         mouse_drag: :motion,
         mouse_down: :button_press,
-        mouse_up: :button_release
+        mouse_up: :button_release,
+        mouse_enter: :enter,
+        mouse_leave: :leave
       }
 
       def self.resolve_event_alias(name)
